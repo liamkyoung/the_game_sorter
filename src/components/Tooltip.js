@@ -8,7 +8,7 @@ class Tooltip extends Component {
         this.state = {
             styles: {
                left: '1400px',
-               top:  '250px'
+               top:  '300px'
             }
         }
         this.ratingText = ''
@@ -17,7 +17,6 @@ class Tooltip extends Component {
         this.finalFormatting = this.finalFormatting.bind(this)
         this.formatState = this.formatState.bind(this)
         this.calculateColor = this.calculateColor.bind(this)
-        this.componentWillUnmount = this.componentWillUnmount.bind(this)
       }
 
     finalFormatting() {
@@ -31,6 +30,17 @@ class Tooltip extends Component {
             </div>
         )
     }  
+    componentDidMount() {
+      const tooltip = d3.select('div.tooltip')
+      .transition(600)
+      .style('opacity', 0.9)
+    }
+
+    componentDidUpdate() {
+      this.ratingText = ''
+      this.genreText = ''
+      this.platformsText = ''
+    }
 
     calculateColor() {
       var sizeScale = d3.scaleLinear()
@@ -42,10 +52,6 @@ class Tooltip extends Component {
         return '#f00'
       else
         return color
-    }
-
-    componentWillUnmount() {
-      
     }
 
     formatState(rating, genres, platforms) {

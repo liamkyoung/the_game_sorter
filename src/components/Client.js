@@ -5,6 +5,7 @@ import Tooltip from './Tooltip.js'
 import { Graph } from "react-d3-graph";
 import placeholder from '../images/placeholder.png';
 import cloneDeep from 'clone-deep';
+import * as d3 from 'd3'
 
 const GAMES_ENDPOINT = process.env.REACT_APP_API_GATEWAY_GAMES_ENDPOINT;
 const MULTI_ENDPOINT = process.env.REACT_APP_API_GATEWAY_MULTI_ENDPOINT;
@@ -229,8 +230,12 @@ class Client extends React.Component {
     if (!found) {
       return;
     } else {
-      this.setState({hoveredNode: found});
+      const tooltip = d3.select('div.tooltip')
+      .transition(700)
+      .style('opacity', 0.9)
+      this.setState({hoveredNode: found})
     }
+                
   }
 
   onMouseOutNode(nodeId) {
@@ -238,7 +243,9 @@ class Client extends React.Component {
     if (!found) {
       return;
     } else {
-      this.setState({hoveredNode: null});
+      const tooltip = d3.select('div.tooltip')
+      .transition(500)
+      .style('opacity', 0)
     }
   }
 
