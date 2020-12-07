@@ -1,0 +1,31 @@
+div.tooltip {
+    position: absolute;			
+    text-align: left;			
+    width: 200px;									
+    padding: 2px;				
+    font: 13px sans-serif;	
+    shape-rendering: crispEdges;	
+    background: #c9c9c9;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;	
+}
+
+h3 {
+    color: #ffffff;
+}
+
+h2 {
+    color: #ffffff;
+    font-size: 15px;
+}
+
+h1 {
+    color: #ffffff;
+    font-size: 20px;
+}
+
+h4 {
+    color: #ffffff;
+    font-size: 18px;
+}
