@@ -4,27 +4,24 @@ import styled from "@emotion/styled";
 const SearchBar = (props) => {
   const [query, setQuery] = useState("");
   const inputRef = useRef("");
-    return (
-      <Container>
-        <FormElement
-          onSubmit={(e) => {
-            e.preventDefault();
-            props.getSearchedGame(query);
-          }}
-        >
-          <InputField
-            ref={inputRef}
-            required
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <SearchB type="submit">          
-            Search
-          </SearchB>
-        </FormElement>
-      </Container>
-    )
- 
+  return (
+    <Container>
+      <FormElement
+        onSubmit={(e) => {
+          e.preventDefault();
+          props.getSearchedGame(query);
+        }}
+      >
+        <InputField
+          ref={inputRef}
+          required
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <SearchB type="submit">Search</SearchB>
+      </FormElement>
+    </Container>
+  );
 };
 
 export default SearchBar;
@@ -44,7 +41,7 @@ const FormElement = styled.form`
   margin-left: auto;
   margin-right: auto;
   width: 80%;
-  top:-10px;
+  top: -10px;
   background: #46618b;
   border-radius: 5px;
 `;

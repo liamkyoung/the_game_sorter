@@ -1,105 +1,105 @@
-import React from 'react';
-import axios from 'axios';
-import Interface from './GUI.js';
-import Tooltip from './Tooltip.js'
+import React from "react";
+import axios from "axios";
+import Interface from "./GUI.js";
+import Tooltip from "./Tooltip.js";
 import { Graph } from "react-d3-graph";
-import placeholder from '../images/placeholder.png';
-import cloneDeep from 'clone-deep';
-import * as d3 from 'd3'
+import placeholder from "../images/placeholder.png";
+import cloneDeep from "clone-deep";
+import * as d3 from "d3";
 
 const GAMES_ENDPOINT = process.env.REACT_APP_API_GATEWAY_GAMES_ENDPOINT;
 const MULTI_ENDPOINT = process.env.REACT_APP_API_GATEWAY_MULTI_ENDPOINT;
-const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
-const TOKEN_AUTH = process.env.REACT_APP_TOKEN_AUTH;
-
 
 class Game {
   constructor(game) {
     this.name = game.name;
-    this.genres = (game.genres) ? game.genres.map((i)=>i.name) : [];
-    this.cover = (game.cover) ? game.cover.url : placeholder;
-    this.similarGames = (game.similar_games) ? game.similar_games.map((i)=>i.name) : [];
+    this.genres = game.genres ? game.genres.map((i) => i.name) : [];
+    this.cover = game.cover ? game.cover.url : placeholder;
+    this.similarGames = game.similar_games
+      ? game.similar_games.map((i) => i.name)
+      : [];
     this.rating = game.total_rating || 0;
-    this.platforms =  (game.platforms) ? game.platforms.map((i)=>i.name) : [];
+    this.platforms = game.platforms ? game.platforms.map((i) => i.name) : [];
   }
 }
 
 const initialState = {
-  searchedGame: '',
+  searchedGame: "",
   gameTitles: [],
   games: [],
   connections: [],
-  hoveredNode: null
-}
+  hoveredNode: null,
+};
 
 class Client extends React.Component {
   constructor(props) {
     super(props);
     this.state = cloneDeep(initialState);
     this.graphConfig = {
-      "width": 900,
-      "height": 850,
-      "automaticRearrangeAfterDropNode": true,
-      "collapsible": false,
-      "directed": false,
-      "focusAnimationDuration": 0.75,
-      "freezeAllDragEvents": false,
-      "focusZoom": 1,
-      "highlightDegree": 1,
-      "highlightOpacity": 1,
-      "linkHighlightBehavior": false,
-      "maxZoom": 8,
-      "minZoom": 0.1,
-      "nodeHighlightBehavior": true,
-      "panAndZoom": true,
-      "staticGraph": false,
-      "staticGraphWithDragAndDrop": false,
-      "d3": {
-        "alphaTarget": 0.05,
-        "gravity": -400,
-        "linkLength": 100,
-        "linkStrength": 1,
-        "disableLinkForce": false
+      width: 900,
+      height: 850,
+      automaticRearrangeAfterDropNode: true,
+      collapsible: false,
+      directed: false,
+      focusAnimationDuration: 0.75,
+      freezeAllDragEvents: false,
+      focusZoom: 1,
+      highlightDegree: 1,
+      highlightOpacity: 1,
+      linkHighlightBehavior: false,
+      maxZoom: 8,
+      minZoom: 0.1,
+      nodeHighlightBehavior: true,
+      panAndZoom: true,
+      staticGraph: false,
+      staticGraphWithDragAndDrop: false,
+      d3: {
+        alphaTarget: 0.05,
+        gravity: -400,
+        linkLength: 100,
+        linkStrength: 1,
+        disableLinkForce: false,
       },
-      "node": {
-        "color": "#ffffff",
-        "fontColor": "#394e70",
-        "fontSize": 14,
-        "fontWeight": "bold",
-        "highlightColor": "#46618b",
-        "highlightFontSize": 18,
-        "highlightFontWeight": "bold",
-        "highlightStrokeColor": "white",
-        "highlightStrokeWidth": "SAME",
-        "labelProperty": "id",
-        "labelPosition": "bottom",
-        "mouseCursor": "pointer",
-        "opacity": 0.9,
-        "renderLabel": true,
-        "size": 500,
-        "strokeColor": "none",
-        "strokeWidth": 1.5,
-        "svg": "",
-        "symbolType": "circle"
+      node: {
+        color: "#ffffff",
+        fontColor: "#394e70",
+        fontSize: 14,
+        fontWeight: "bold",
+        highlightColor: "#46618b",
+        highlightFontSize: 18,
+        highlightFontWeight: "bold",
+        highlightStrokeColor: "white",
+        highlightStrokeWidth: "SAME",
+        labelProperty: "id",
+        labelPosition: "bottom",
+        mouseCursor: "pointer",
+        opacity: 0.9,
+        renderLabel: true,
+        size: 500,
+        strokeColor: "none",
+        strokeWidth: 1.5,
+        svg: "",
+        symbolType: "circle",
       },
-      "link": {
-        "color": "#ffffff",
-        "fontColor": "black",
-        "fontSize": 8,
-        "fontWeight": "normal",
-        "highlightColor": "SAME",
-        "highlightFontSize": 8,
-        "highlightFontWeight": "normal",
-        "labelProperty": "label",
-        "mouseCursor": "pointer",
-        "opacity": 0.6,
-        "renderLabel": false,
-        "semanticStrokeWidth": false,
-        "strokeWidth": 1.5,
-        "markerHeight": 6,
-        "markerWidth": 6
-      }
+      link: {
+        color: "#ffffff",
+        fontColor: "black",
+        fontSize: 8,
+        fontWeight: "normal",
+        highlightColor: "SAME",
+        highlightFontSize: 8,
+        highlightFontWeight: "normal",
+        labelProperty: "label",
+        mouseCursor: "pointer",
+        opacity: 0.6,
+        renderLabel: false,
+        semanticStrokeWidth: false,
+        strokeWidth: 1.5,
+        markerHeight: 6,
+        markerWidth: 6,
+      },
     };
+
     this.makeRequest = this.makeRequest.bind(this);
     this.getSearchedGame = this.getSearchedGame.bind(this);
     this.getSimilarGames = this.getSimilarGames.bind(this);
@@ -109,18 +109,13 @@ class Client extends React.Component {
   }
 
   makeRequest(url, dataParams) {
-    return (
-      axios({
-        url: `${url}`,
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Client-ID': `${CLIENT_ID}`,
-          'Authorization': `${TOKEN_AUTH}`,
-        },
-        data: `${dataParams}`
-      })
-    )
+    return axios({
+      url: url,
+      method: "POST",
+      data: { query: `${dataParams}` },
+    }).catch((e) => {
+      console.log(e);
+    });
   }
 
   async getSearchedGame(name) {
@@ -134,8 +129,8 @@ class Client extends React.Component {
       const dataParams = `fields name,similar_games.name,cover.url,genres.name,platforms.name,total_rating; search "${name}";`;
       const response = await this.makeRequest(url, dataParams);
       gameTitles = this.state.gameTitles;
-      console.log("Success");
-      const searchedGame = new Game(response.data[0]);
+      console.log("Success", response);
+      const searchedGame = new Game(response.data.data[0]);
       games.push(searchedGame);
       gameTitles.push(searchedGame.name);
       this.setState({
@@ -157,7 +152,7 @@ class Client extends React.Component {
       let gameTitles = this.state.gameTitles;
 
       // get similar game names of searched game
-      const similarGames = searchedGame['similarGames']
+      const similarGames = searchedGame["similarGames"];
       const url = MULTI_ENDPOINT;
       let dataParams = "";
       console.log(similarGames);
@@ -165,7 +160,11 @@ class Client extends React.Component {
       // add connections between similar games
       similarGames.forEach((game) => {
         // do not add duplicate connections
-        if (!this.state.connections.find(e => e.source === searchedGame.name && e.target === game)) {
+        if (
+          !this.state.connections.find(
+            (e) => e.source === searchedGame.name && e.target === game
+          )
+        ) {
           connections.push({
             source: searchedGame.name,
             target: game,
@@ -180,10 +179,10 @@ class Client extends React.Component {
         `);
       });
       const response = await this.makeRequest(url, dataParams);
-      console.log(response.data);
+      console.log("HERE", response.data.data);
 
       // add information for similar games to Client state
-      response.data.forEach((snip) => {
+      response.data.data.forEach((snip) => {
         const game = snip.result[0];
         // do not add duplicate games
         if (!this.state.gameTitles.includes(game.name)) {
@@ -195,7 +194,6 @@ class Client extends React.Component {
         games: games,
         connections: connections,
       });
-
     } catch (err) {
       console.log("Failed");
       console.error(err);
@@ -210,45 +208,45 @@ class Client extends React.Component {
       cover: gameData.cover,
       similarGames: gameData.similarGames,
       rating: gameData.rating,
-      platforms: gameData.platforms
-    }
+      platforms: gameData.platforms,
+    };
     this.getSimilarGames(game);
   }
 
   componentDidMount() {
-    console.log('App mounted');
+    console.log("App mounted");
   }
 
   onClickNode(nodeId) {
-    let found = this.state.games.find(e => e.name === nodeId);
+    let found = this.state.games.find((e) => e.name === nodeId);
     console.log(found);
     this.getSimilarGames(found);
-  };
+  }
 
   onMouseOverNode(nodeId) {
-    let found = Array.from(this.state.games).find(e => e.name === nodeId);
+    let found = Array.from(this.state.games).find((e) => e.name === nodeId);
     if (!found) {
       return;
     } else {
-      const tooltip = d3.select('div.tooltip')
-      .transition(700)
-      .style('opacity', 0.9)
-      this.setState({hoveredNode: found})
+      const tooltip = d3
+        .select("div.tooltip")
+        .transition(700)
+        .style("opacity", 0.9);
+      this.setState({ hoveredNode: found });
     }
-                
   }
 
   onMouseOutNode(nodeId) {
-    let found = Array.from(this.state.games).find(e => e.name === nodeId);
+    let found = Array.from(this.state.games).find((e) => e.name === nodeId);
     if (!found) {
       return;
     } else {
-      const tooltip = d3.select('div.tooltip')
-      .transition(500)
-      .style('opacity', 0)
+      const tooltip = d3
+        .select("div.tooltip")
+        .transition(500)
+        .style("opacity", 0);
     }
   }
-
 
   render() {
     // use default data for graph if no games stored yet in Client
@@ -256,13 +254,13 @@ class Client extends React.Component {
     if (this.state.games.length !== 0) {
       data = {
         nodes: this.state.games.map((game) => {
-          return ({
+          return {
             id: game.name,
-            svg: game.cover
-          })
+            svg: game.cover,
+          };
         }),
-        links: this.state.connections
-      }
+        links: this.state.connections,
+      };
     } else {
       data = {
         nodes: [{ id: "Search to start" }, { id: "Game 1" }, { id: "Game 2" }],
@@ -276,29 +274,29 @@ class Client extends React.Component {
     return (
       <div className="wrapper">
         <div id="left-bar">
-        <Interface
-          getSearchedGame = {this.getSearchedGame}
-          game = {this.state.searchedGame}
-          games = {this.state.games}
-        />
+          {this.state.hoveredNode ? (
+            <Tooltip
+              name={this.state.hoveredNode.name}
+              genres={this.state.hoveredNode.genres}
+              rating={this.state.hoveredNode.rating}
+              platforms={this.state.hoveredNode.platforms}
+            />
+          ) : null}
+          <Interface
+            getSearchedGame={this.getSearchedGame}
+            game={this.state.searchedGame}
+            games={this.state.games}
+          />
         </div>
         <div id="right-visuals">
-          <Graph 
-            id="graph-id" 
+          <Graph
+            id="graph-id"
             data={data}
             config={this.graphConfig}
             onClickNode={this.onClickNode}
             onMouseOverNode={this.onMouseOverNode}
             onMouseOutNode={this.onMouseOutNode}
-          />         
-          {this.state.hoveredNode ? 
-          <Tooltip
-            name={this.state.hoveredNode.name}
-            genres={this.state.hoveredNode.genres}
-            rating={this.state.hoveredNode.rating}
-            platforms={this.state.hoveredNode.platforms}
-          /> : null
-          }
+          />
         </div>
       </div>
     );

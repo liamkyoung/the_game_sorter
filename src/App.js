@@ -1,6 +1,6 @@
-import React from 'react';
-import './App.css';
-import Client from './components/Client.js';
+import React from "react";
+import "./App.css";
+import Client from "./components/Client.js";
 
 class App extends React.Component {
   render() {
@@ -9,7 +9,6 @@ class App extends React.Component {
         <Client />
       </div>
     );
-
   }
 }
 
