@@ -7,7 +7,9 @@ import { useState } from 'react'
 import Switch from './Switch'
 
 const Interface = (props) => {
-  const [algorithm, setAlgorithm] = useState('DFS')
+  const [source, setSource] = useState('')
+  const [dest, setDest] = useState('')
+
   return (
     <Container>
       <Title>The Game Sorter</Title>
@@ -15,21 +17,29 @@ const Interface = (props) => {
       <Selection games={props.games} />
       {props.game && props.adjacencyList && props.games.length >= 2 ? (
         <div>
+          {/* SOURCE: Dropdown Menu with all Games */}
+          {/* DESTINATION : Dropdown Menu with all Games */}
           <GraphAlgorithm
-            type={algorithm}
+            type={'DFS'}
             graph={props.adjacencyList}
-            src={props.games[0].name}
-            dest={props.games[1].name}
+            src={source}
+            dest={dest}
           />
-          {/* 
-            Still need switch for DFS / BFS
-            and list which contains source and target nodes
-          */}
+          <GraphAlgorithm
+            type={'BFS'}
+            graph={props.adjacencyList}
+            src={source}
+            dest={dest}
+          />
         </div>
       ) : null}
     </Container>
   )
 }
+
+const GraphAlgorithmContainer = styled.div`
+  display: flex;
+`
 
 const Container = styled.div`
   align-items: center;

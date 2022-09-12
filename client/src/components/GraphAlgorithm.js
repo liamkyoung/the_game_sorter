@@ -14,7 +14,7 @@ function GraphAlgorithm({ graph, type, src, dest }) {
               setTime(res)
             )
           }}>
-          GraphAlgorithm
+          {type}
         </button>
       ) : null}
 
@@ -57,7 +57,7 @@ async function breadthFirstSearch(adjacencyList, src, dest, visited) {
 
 async function runTraversal(type, graph, src, dest, visit) {
   const t1 = Date.now()
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 10000; i++) {
     if (type === 'DFS') {
       await depthFirstSearch(graph, src, dest, visit)
     } else {
