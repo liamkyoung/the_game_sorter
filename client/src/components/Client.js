@@ -1,40 +1,41 @@
-import React from "react";
-import axios from "axios";
-import Interface from "./GUI.js";
-import Tooltip from "./Tooltip.js";
-import { Graph } from "react-d3-graph";
-import placeholder from "../images/placeholder.png";
-import cloneDeep from "clone-deep";
-import * as d3 from "d3";
+import React from 'react'
+import axios from 'axios'
+import Interface from './GUI.js'
+import Tooltip from './Tooltip.js'
+import { Graph } from 'react-d3-graph'
+import placeholder from '../images/placeholder.png'
+import cloneDeep from 'clone-deep'
+import * as d3 from 'd3'
 
-const GAMES_ENDPOINT = process.env.REACT_APP_API_GATEWAY_GAMES_ENDPOINT;
-const MULTI_ENDPOINT = process.env.REACT_APP_API_GATEWAY_MULTI_ENDPOINT;
+const GAMES_ENDPOINT = process.env.REACT_APP_API_GATEWAY_GAMES_ENDPOINT
+const MULTI_ENDPOINT = process.env.REACT_APP_API_GATEWAY_MULTI_ENDPOINT
 
 class Game {
   constructor(game) {
-    this.name = game.name;
-    this.genres = game.genres ? game.genres.map((i) => i.name) : [];
-    this.cover = game.cover ? game.cover.url : placeholder;
+    this.name = game.name
+    this.genres = game.genres ? game.genres.map((i) => i.name) : []
+    this.cover = game.cover ? game.cover.url : placeholder
     this.similarGames = game.similar_games
       ? game.similar_games.map((i) => i.name)
-      : [];
-    this.rating = game.total_rating || 0;
-    this.platforms = game.platforms ? game.platforms.map((i) => i.name) : [];
+      : []
+    this.rating = game.total_rating || 0
+    this.platforms = game.platforms ? game.platforms.map((i) => i.name) : []
   }
 }
 
 const initialState = {
-  searchedGame: "",
+  searchedGame: '',
   gameTitles: [],
   games: [],
   connections: [],
   hoveredNode: null,
-};
+  adjacencyList: {},
+}
 
 class Client extends React.Component {
   constructor(props) {
-    super(props);
-    this.state = cloneDeep(initialState);
+    super(props)
+    this.state = cloneDeep(initialState)
     this.graphConfig = {
       width: 900,
       height: 850,
@@ -61,36 +62,36 @@ class Client extends React.Component {
         disableLinkForce: false,
       },
       node: {
-        color: "#ffffff",
-        fontColor: "#394e70",
+        color: '#ffffff',
+        fontColor: '#394e70',
         fontSize: 14,
-        fontWeight: "bold",
-        highlightColor: "#46618b",
+        fontWeight: 'bold',
+        highlightColor: '#46618b',
         highlightFontSize: 18,
-        highlightFontWeight: "bold",
-        highlightStrokeColor: "white",
-        highlightStrokeWidth: "SAME",
-        labelProperty: "id",
-        labelPosition: "bottom",
-        mouseCursor: "pointer",
+        highlightFontWeight: 'bold',
+        highlightStrokeColor: 'white',
+        highlightStrokeWidth: 'SAME',
+        labelProperty: 'id',
+        labelPosition: 'bottom',
+        mouseCursor: 'pointer',
         opacity: 0.9,
         renderLabel: true,
         size: 500,
-        strokeColor: "none",
+        strokeColor: 'none',
         strokeWidth: 1.5,
-        svg: "",
-        symbolType: "circle",
+        svg: '',
+        symbolType: 'circle',
       },
       link: {
-        color: "#ffffff",
-        fontColor: "black",
+        color: '#ffffff',
+        fontColor: 'black',
         fontSize: 8,
-        fontWeight: "normal",
-        highlightColor: "SAME",
+        fontWeight: 'normal',
+        highlightColor: 'SAME',
         highlightFontSize: 8,
-        highlightFontWeight: "normal",
-        labelProperty: "label",
-        mouseCursor: "pointer",
+        highlightFontWeight: 'normal',
+        labelProperty: 'label',
+        mouseCursor: 'pointer',
         opacity: 0.6,
         renderLabel: false,
         semanticStrokeWidth: false,
@@ -98,64 +99,66 @@ class Client extends React.Component {
         markerHeight: 6,
         markerWidth: 6,
       },
-    };
+    }
 
-    this.makeRequest = this.makeRequest.bind(this);
-    this.getSearchedGame = this.getSearchedGame.bind(this);
-    this.getSimilarGames = this.getSimilarGames.bind(this);
-    this.onClickNode = this.onClickNode.bind(this);
-    this.onMouseOverNode = this.onMouseOverNode.bind(this);
-    this.onMouseOutNode = this.onMouseOutNode.bind(this);
+    this.makeRequest = this.makeRequest.bind(this)
+    this.getSearchedGame = this.getSearchedGame.bind(this)
+    this.getSimilarGames = this.getSimilarGames.bind(this)
+    this.onClickNode = this.onClickNode.bind(this)
+    this.onMouseOverNode = this.onMouseOverNode.bind(this)
+    this.onMouseOutNode = this.onMouseOutNode.bind(this)
+    this.buildGraph = this.buildGraph.bind(this)
   }
 
   makeRequest(url, dataParams) {
     return axios({
       url: url,
-      method: "POST",
+      method: 'POST',
       data: { query: `${dataParams}` },
     }).catch((e) => {
-      console.log(e);
-    });
+      console.log(e)
+    })
   }
 
   async getSearchedGame(name) {
     try {
       // reset game data stored in client
-      const copy = cloneDeep(initialState);
-      await this.setState(copy);
-      let games = this.state.games;
-      let gameTitles = this.state.gameTitles;
-      const url = GAMES_ENDPOINT;
-      const dataParams = `fields name,similar_games.name,cover.url,genres.name,platforms.name,total_rating; search "${name}";`;
-      const response = await this.makeRequest(url, dataParams);
-      gameTitles = this.state.gameTitles;
-      console.log("Success", response);
-      const searchedGame = new Game(response.data.data[0]);
-      games.push(searchedGame);
-      gameTitles.push(searchedGame.name);
+      const copy = cloneDeep(initialState)
+      await this.setState(copy)
+      let games = this.state.games
+      let gameTitles = this.state.gameTitles
+      let adjList = this.state.adjacencyList
+      const url = GAMES_ENDPOINT
+      const dataParams = `fields name,similar_games.name,cover.url,genres.name,platforms.name,total_rating; search "${name}";`
+      const response = await this.makeRequest(url, dataParams)
+      gameTitles = this.state.gameTitles
+      console.log('Success', response)
+      const searchedGame = new Game(response.data.data[0])
+      games.push(searchedGame)
+      gameTitles.push(searchedGame.name)
       this.setState({
         games: games,
         gameTitles: gameTitles,
         searchedGame: searchedGame.name,
-      });
-      await this.getSimilarGames(searchedGame);
+      })
+      await this.getSimilarGames(searchedGame)
     } catch (err) {
-      console.log("Failed");
-      console.error(err);
+      console.log('Failed')
+      console.error(err)
     }
   }
 
   async getSimilarGames(searchedGame) {
     try {
-      let games = this.state.games;
-      let connections = this.state.connections;
-      let gameTitles = this.state.gameTitles;
+      let games = this.state.games
+      let connections = this.state.connections
+      let gameTitles = this.state.gameTitles
 
       // get similar game names of searched game
-      const similarGames = searchedGame["similarGames"];
-      const url = MULTI_ENDPOINT;
-      let dataParams = "";
-      console.log(similarGames);
+      const similarGames = searchedGame['similarGames']
+      const url = MULTI_ENDPOINT
+      let dataParams = ''
+      console.log(similarGames)
 
       // add connections between similar games
       similarGames.forEach((game) => {
@@ -168,7 +171,7 @@ class Client extends React.Component {
           connections.push({
             source: searchedGame.name,
             target: game,
-          });
+          })
         }
         // append query to request parameters
         dataParams = dataParams.concat(`
@@ -176,32 +179,49 @@ class Client extends React.Component {
               fields name,similar_games.name,cover.url,genres.name,platforms.name,total_rating;
               where name = "${game}";
             };
-        `);
-      });
-      const response = await this.makeRequest(url, dataParams);
-      console.log("HERE", response.data.data);
+        `)
+      })
+      const response = await this.makeRequest(url, dataParams)
 
       // add information for similar games to Client state
       response.data.data.forEach((snip) => {
-        const game = snip.result[0];
+        const game = snip.result[0]
         // do not add duplicate games
         if (!this.state.gameTitles.includes(game.name)) {
-          games.push(new Game(game));
-          gameTitles.push(game.name);
+          games.push(new Game(game))
+          gameTitles.push(game.name)
         }
-      });
+      })
+      const adjList = this.buildGraph(connections)
       await this.setState({
         games: games,
         connections: connections,
-      });
+        adjacencyList: adjList,
+      })
     } catch (err) {
-      console.log("Failed");
-      console.error(err);
+      console.log('Failed')
+      console.error(err)
     }
+    console.log(this.state)
+  }
+
+  buildGraph(edgeList) {
+    const edges = edgeList
+    const graph = {}
+    edges.forEach((edge) => {
+      const { source, target } = edge
+      if (!(source in graph)) graph[source] = []
+      if (!(target in graph)) graph[target] = []
+
+      graph[source].push(target)
+      graph[target].push(source)
+    })
+
+    return graph
   }
 
   onNodeClick(e) {
-    const gameData = e.target.__data__;
+    const gameData = e.target.__data__
     const game = {
       name: gameData.id,
       genres: gameData.genres,
@@ -209,71 +229,71 @@ class Client extends React.Component {
       similarGames: gameData.similarGames,
       rating: gameData.rating,
       platforms: gameData.platforms,
-    };
-    this.getSimilarGames(game);
+    }
+    this.getSimilarGames(game)
   }
 
   componentDidMount() {
-    console.log("App mounted");
+    console.log('App mounted')
   }
 
   onClickNode(nodeId) {
-    let found = this.state.games.find((e) => e.name === nodeId);
-    console.log(found);
-    this.getSimilarGames(found);
+    let found = this.state.games.find((e) => e.name === nodeId)
+    console.log(found)
+    this.getSimilarGames(found)
   }
 
   onMouseOverNode(nodeId) {
-    let found = Array.from(this.state.games).find((e) => e.name === nodeId);
+    let found = Array.from(this.state.games).find((e) => e.name === nodeId)
     if (!found) {
-      return;
+      return
     } else {
       const tooltip = d3
-        .select("div.tooltip")
+        .select('div.tooltip')
         .transition(700)
-        .style("opacity", 0.9);
-      this.setState({ hoveredNode: found });
+        .style('opacity', 0.9)
+      this.setState({ hoveredNode: found })
     }
   }
 
   onMouseOutNode(nodeId) {
-    let found = Array.from(this.state.games).find((e) => e.name === nodeId);
+    let found = Array.from(this.state.games).find((e) => e.name === nodeId)
     if (!found) {
-      return;
+      return
     } else {
       const tooltip = d3
-        .select("div.tooltip")
+        .select('div.tooltip')
         .transition(500)
-        .style("opacity", 0);
+        .style('opacity', 0)
     }
   }
 
   render() {
     // use default data for graph if no games stored yet in Client
-    let data;
+    let data
     if (this.state.games.length !== 0) {
       data = {
         nodes: this.state.games.map((game) => {
           return {
             id: game.name,
             svg: game.cover,
-          };
+          }
         }),
         links: this.state.connections,
-      };
+      }
     } else {
       data = {
-        nodes: [{ id: "Search to start" }, { id: "Game 1" }, { id: "Game 2" }],
+        nodes: [{ id: 'Search to start' }, { id: 'Game 1' }, { id: 'Game 2' }],
         links: [
-          { source: "Search to start", target: "Game 1" },
-          { source: "Search to start", target: "Game 2" },
+          { source: 'Search to start', target: 'Game 1' },
+          { source: 'Search to start', target: 'Game 2' },
         ],
-      };
+      }
     }
 
     return (
-      <div className="wrapper">
-        <div id="left-bar">
+      <div className='wrapper'>
+        <div id='left-bar'>
           {this.state.hoveredNode ? (
             <Tooltip
               name={this.state.hoveredNode.name}
@@ -286,11 +306,12 @@ class Client extends React.Component {
             getSearchedGame={this.getSearchedGame}
             game={this.state.searchedGame}
             games={this.state.games}
+            adjacencyList={this.state.adjacencyList}
           />
         </div>
-        <div id="right-visuals">
+        <div id='right-visuals'>
           <Graph
-            id="graph-id"
+            id='graph-id'
             data={data}
             config={this.graphConfig}
             onClickNode={this.onClickNode}
@@ -299,8 +320,8 @@ class Client extends React.Component {
           />
         </div>
       </div>
-    );
+    )
   }
 }
 
-export default Client;
+export default Client

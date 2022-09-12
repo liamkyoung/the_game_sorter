@@ -1,48 +1,47 @@
-import React, { useState } from "react";
-import styled from "@emotion/styled";
-import Algorithm from "./Algorithm";
+import React, { useState } from 'react'
+import styled from '@emotion/styled'
+import Algorithm from './Algorithm'
+import GraphAlgorithm from './GraphAlgorithm'
 
 const Selection = (props) => {
-  const [choice, setChoice] = useState("select");
+  const [choice, setChoice] = useState('select')
 
-  if (choice === "select") {
+  if (choice === 'select') {
     return (
       <Container>
         <FirstSort
           onClick={(e) => {
-            e.preventDefault();
-            setChoice("first");
-          }}
-        >
+            e.preventDefault()
+            setChoice('first')
+          }}>
           Selection Sort
         </FirstSort>
         <SecondSort
           onClick={(e) => {
-            e.preventDefault();
-            setChoice("second");
-          }}
-        >
+            e.preventDefault()
+            setChoice('second')
+          }}>
           Shell Sort
         </SecondSort>
+        <GraphAlgorithm />
       </Container>
-    );
+    )
   } else {
     return (
       <Container2>
         <Exit
           onClick={(e) => {
-            e.preventDefault();
-            setChoice("select");
-          }}
-        >
+            e.preventDefault()
+            setChoice('select')
+          }}>
           X
         </Exit>
         <Algorithm process={choice} games={props.games} />
       </Container2>
-    );
+    )
   }
-};
-export default Selection;
+}
+export default Selection
 
 const Container = styled.div`
   background: #46618b;
@@ -58,7 +57,7 @@ const Container = styled.div`
   justify-content: space-around;
   -ms-transform: translateY(-60%);
   transform: translateY(300%);
-`;
+`
 const Container2 = styled.div`
   background: #46618b;
   display: flex;
@@ -73,7 +72,7 @@ const Container2 = styled.div`
   justify-content: space-around;
   -ms-transform: translateY(-60%);
   transform: translateY(110%);
-`;
+`
 const FirstSort = styled.button`
   background: #394e70;
   border: transparent;
@@ -85,7 +84,7 @@ const FirstSort = styled.button`
   white-space: nowrap;
   -ms-transform: translateY(-60%);
   transform: translateY(0%);
-`;
+`
 const SecondSort = styled.button`
   background: #394e70;
   border: transparent;
@@ -97,7 +96,7 @@ const SecondSort = styled.button`
   -ms-transform: translateY(-60%);
   transform: translateY(0%);
   cursor: pointer;
-`;
+`
 const Exit = styled.button`
   background: #ce2121;
   position: absolute;
@@ -107,4 +106,4 @@ const Exit = styled.button`
   border: transparent;
   cursor: pointer;
   color: white;
-`;
+`
