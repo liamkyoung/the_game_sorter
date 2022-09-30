@@ -1,36 +1,60 @@
-import React from 'react'
-import styled from '@emotion/styled'
-import SearchBar from './Search'
-import Selection from './SortSelect'
-import GraphAlgorithm from './GraphAlgorithm'
-import { useState } from 'react'
-import Switch from './Switch'
+import React, { useEffect, useState } from "react"
+import styled from "@emotion/styled"
+import SearchBar from "./Search"
+import Selection from "./SortSelect"
+import GraphAlgorithm from "./GraphAlgorithm"
+import Dropdown from "./Dropdown"
+import Switch from "./Switch"
+import GUI from "../GUI.css"
 
 const Interface = (props) => {
-  const [source, setSource] = useState('')
-  const [dest, setDest] = useState('')
+  const [source, setSource] = useState("")
+  const [dest, setDest] = useState("")
 
+  useEffect(() => {
+    console.log("source: ", source)
+    console.log("dest: ", dest)
+  }, [source, dest])
   return (
     <Container>
       <Title>The Game Sorter</Title>
       <SearchBar getSearchedGame={props.getSearchedGame} game={props.game} />
-      <Selection games={props.games} />
       {props.game && props.adjacencyList && props.games.length >= 2 ? (
-        <div>
+        <div className='flex graph-algorithm white'>
           {/* SOURCE: Dropdown Menu with all Games */}
           {/* DESTINATION : Dropdown Menu with all Games */}
-          <GraphAlgorithm
-            type={'DFS'}
-            graph={props.adjacencyList}
-            src={source}
-            dest={dest}
-          />
-          <GraphAlgorithm
-            type={'BFS'}
-            graph={props.adjacencyList}
-            src={source}
-            dest={dest}
-          />
+          <div>
+            <Dropdown
+              text='Source'
+              games={props.games?.filter((item) => item.name !== dest)}
+              node={setSource}
+            />
+            <Dropdown
+              text='Dest'
+              games={props.games?.filter((item) => item.name !== source)}
+              node={setDest}
+            />
+          </div>
+
+          <div>
+            <GraphAlgorithmContainer>
+              <GraphAlgorithm
+                type={"DFS"}
+                graph={props.adjacencyList}
+                src={source}
+                dest={dest}
+              />
+            </GraphAlgorithmContainer>
+
+            <GraphAlgorithmContainer>
+              <GraphAlgorithm
+                type={"BFS"}
+                graph={props.adjacencyList}
+                src={source}
+                dest={dest}
+              />
+            </GraphAlgorithmContainer>
+          </div>
         </div>
       ) : null}
     </Container>
@@ -38,7 +62,7 @@ const Interface = (props) => {
 }
 
 const GraphAlgorithmContainer = styled.div`
-  display: flex;
+  color: #394e70;
 `
 
 const Container = styled.div`

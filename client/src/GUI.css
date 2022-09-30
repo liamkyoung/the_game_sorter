@@ -1,0 +1,33 @@
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  transform: translateY(40vh);
+}
+
+.graph-algorithm {
+  background-color: #394e70;
+  margin: 2px;
+  border-radius: 0.5em;
+  padding: 5px;
+}
+
+.black {
+  color: #000000;
+}
+
+.white {
+  color: #ffffff;
+  font: bold;
+}
+
+.flex-1 {
+  flex-grow: 1;
+}
+
+.graph-button {
+  margin: 5px;
+  padding: 3px;
+  background-color: #1f2a3b;
+  color: #ffffff;
+}

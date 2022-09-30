@@ -1,24 +1,31 @@
-import React from 'react'
-import { useState } from 'react'
+import React from "react"
+import { useState } from "react"
+import GUI from "../GUI.css"
 
 function GraphAlgorithm({ graph, type, src, dest }) {
   const [time, setTime] = useState(null)
   let visited = new Set()
   return (
     <div>
-      {type ? (
+      {type && src && dest ? (
         <button
+          className='graph-button'
           onClick={() => {
             visited = new Set()
             runTraversal(type, graph, src, dest, visited).then((res) =>
               setTime(res)
             )
-          }}>
+          }}
+        >
           {type}
         </button>
       ) : null}
 
-      {time !== null ? <h1>Time: {time.toString()} ms</h1> : <></>}
+      {time !== null ? (
+        <h1 className='white'>Time: {time.toString()} ms</h1>
+      ) : (
+        <></>
+      )}
     </div>
   )
 }
@@ -57,8 +64,8 @@ async function breadthFirstSearch(adjacencyList, src, dest, visited) {
 
 async function runTraversal(type, graph, src, dest, visit) {
   const t1 = Date.now()
-  for (let i = 0; i < 10000; i++) {
-    if (type === 'DFS') {
+  for (let i = 0; i < 100000; i++) {
+    if (type === "DFS") {
       await depthFirstSearch(graph, src, dest, visit)
     } else {
       await breadthFirstSearch(graph, src, dest, visit)
